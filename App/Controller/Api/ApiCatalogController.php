@@ -1,6 +1,9 @@
 <?php
 
-require_once BASE_PATH . '/Service/CatalogService.php';
+namespace App\Controller\Api;
+
+use App\Service\CatalogService;
+use Exception;
 
 class ApiCatalogController
 {
@@ -25,7 +28,6 @@ class ApiCatalogController
                 'message' => 'Catalog fetched successfully',
                 'data' => $data
             ]);
-
         } catch (Exception $e) {
 
             http_response_code(500);

@@ -1,10 +1,16 @@
 <?php
 
+namespace App\Service;
+
+use App\Contract\UserRepositoryInterface;
+
+
+
 class AuthService
 {
-    private UserRepository $userRepository;
+    private UserRepositoryInterface $userRepository;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepositoryInterface $userRepository)
     {
         $this->userRepository = $userRepository;
     }

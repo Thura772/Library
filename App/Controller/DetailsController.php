@@ -1,11 +1,15 @@
 <?php
 
+namespace App\Controller;
+
+use App\Service\CatalogService;
+use App\Controller\BaseController;
+
 /**
  * Handles displaying detailed information
  * for a single catalog item.
  */
 
-require_once BASE_PATH . '/Controller/BaseController.php';
 
 class DetailsController extends BaseController
 {
@@ -22,7 +26,7 @@ class DetailsController extends BaseController
      */
     public function show(): void
     {
-        
+
         // Validate item ID
         $id = filter_input(
             INPUT_GET,

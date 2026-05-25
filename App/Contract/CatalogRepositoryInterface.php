@@ -1,6 +1,8 @@
 <?php
 
-require_once BASE_PATH . '/Contract/BaseRepositoryInterface.php';
+namespace App\Contract;
+
+use App\Contract\BaseRepositoryInterface;
 
 /*
  Repository interface for catalog-related operations

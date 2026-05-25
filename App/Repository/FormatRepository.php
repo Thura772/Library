@@ -1,16 +1,12 @@
 <?php
 
-require_once BASE_PATH . '/Repository/BaseRepository.php';
-require_once BASE_PATH . '/Contract/FormatRepositoryInterface.php';
+namespace App\Repository;
 
-class FormatRepository implements FormatRepositoryInterface
+use PDO;
+use App\Contract\FormatRepositoryInterface;
+
+class FormatRepository extends BaseRepository implements FormatRepositoryInterface
 {
-    protected PDO $db;
-
-    public function __construct(PDO $db)
-    {
-        $this->db = $db;
-    }
     /*
      * FORMAT DROPDOWN
      */

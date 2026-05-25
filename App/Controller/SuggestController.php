@@ -1,10 +1,14 @@
 <?php
 
+namespace App\Controller;
+
+use App\Service\FormatService;
+use App\Controller\BaseController;
+
 /**
  * Handles media suggestion requests.
  */
 
-require_once BASE_PATH . '/Controller/BaseController.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 
@@ -35,7 +39,7 @@ class SuggestController extends BaseController
             'genre'        => null,
             'year'         => null,
             'details'      => null,
-            'error_message'=> null
+            'error_message' => null
         ];
 
         // Handle form
@@ -49,15 +53,15 @@ class SuggestController extends BaseController
         // Dropdown data
         $data['categories']
             = $this->formatService
-                ->category_drop_down();
+            ->category_drop_down();
 
         $data['formats']
             = $this->formatService
-                ->format_array();
+            ->format_array();
 
         $data['genres']
             = $this->formatService
-                ->genres_array();
+            ->genres_array();
 
         $this->view('suggest', $data);
     }
@@ -107,7 +111,7 @@ class SuggestController extends BaseController
         }
 
         // Send email here...
-          /* SEND EMAIL */
+        /* SEND EMAIL */
 
         // Build email message body
         $email_body = "Name: {$data['name']}\n";
@@ -154,6 +158,3 @@ class SuggestController extends BaseController
         return $data;
     }
 }
-
-      
-   

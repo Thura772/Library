@@ -1,35 +1,38 @@
 <?php
 
-// use BaseRepositoryInterface;
-require_once BASE_PATH . '/Contract/BaseRepositoryInterface.php';
+namespace App\Repository;
+
+use PDO;
+use App\Contract\BaseRepositoryInterface;
+
 
 abstract class BaseRepository implements BaseRepositoryInterface
 {
-     protected PDO $db;
+    protected PDO $db;
 
     public function __construct(PDO $db)
     {
         $this->db = $db;
     }
-    //     public function count(array $filters = []): int
-    // {
-    //     $category = $filters['category'] ?? null;
-    //     $search = $filters['search'] ?? null;
+    public function count(array $filters = []): int
+    {
+        $category = $filters['category'] ?? null;
+        $search = $filters['search'] ?? null;
 
-    //     $stmt = $this->db->prepare("CALL sp_search_catalog_count(:search, :category)");
+        $stmt = $this->db->prepare("CALL sp_search_catalog_count(:search, :category)");
 
-    //     $stmt->bindValue(':search', $search ?: null, $search ? PDO::PARAM_STR : PDO::PARAM_NULL);
-    //     $stmt->bindValue(':category', $category ?: null, $category ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':search', $search ?: null, $search ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':category', $category ?: null, $category ? PDO::PARAM_STR : PDO::PARAM_NULL);
 
-    //     $stmt->execute();
+        $stmt->execute();
 
-    //     $count = (int)$stmt->fetchColumn();
+        $count = (int)$stmt->fetchColumn();
 
-    //     $stmt->nextRowset();
-    //     $stmt->closeCursor();
+        $stmt->nextRowset();
+        $stmt->closeCursor();
 
-    //     return $count;
-    // }
+        return $count;
+    }
 
     /*
      * GET ALL (BaseRepositoryInterface)
