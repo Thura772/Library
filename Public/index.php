@@ -1,7 +1,7 @@
 <?php
 
 define('BASE_PATH', realpath(__DIR__ . '/..'));
-define('BASE_URL', '/Library');
+define('BASE_URL', '/MediaLibrary-MVC-');
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once BASE_PATH . '/view/ItemView.php';
