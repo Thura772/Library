@@ -1,12 +1,9 @@
 <?php
 
-if (!defined('BASE_PATH')) {
-    define('BASE_PATH', dirname(__DIR__, 2));
-}
+namespace App\Controller\Api;
 
-require_once BASE_PATH . '/vendor/autoload.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
+use App\Service\FormatService;
+use Throwable;
 
 class ApiSuggestController
 {
@@ -59,7 +56,6 @@ class ApiSuggestController
                 'message' => 'Suggestion submitted successfully',
                 'data' => $data
             ]);
-
         } catch (Throwable $e) {
             http_response_code(500);
 

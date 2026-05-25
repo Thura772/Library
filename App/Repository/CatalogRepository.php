@@ -1,16 +1,13 @@
 <?php
 
-require_once BASE_PATH . '/Repository/BaseRepository.php';
-require_once BASE_PATH . '/Contract/CatalogRepositoryInterface.php';
+namespace App\Repository;
+
+use PDO;
+use App\Contract\CatalogRepositoryInterface;
+use App\Repository\BaseRepository;
 
 class CatalogRepository extends BaseRepository implements CatalogRepositoryInterface
 {
-   
-    /*
-     * COUNT (BaseRepositoryInterface)
-     */
-
-
     /*
      * GET BY CATEGORY
      */
@@ -29,34 +26,7 @@ class CatalogRepository extends BaseRepository implements CatalogRepositoryInter
 
         return $data;
     }
-    function getcatalog_count($category = null, $search = null)
-    {
-        $search = !empty($search) ? $search : null;
-        $category = !empty($category) ? $category : null;
 
-        $result = $this->db->prepare(" CALL sp_search_catalog_count (:search , :category)");
-
-        $result->bindValue(
-            ':search',
-            $search,
-            $search === null ? PDO::PARAM_NULL : PDO::PARAM_STR
-        );
-
-        $result->bindValue(
-            ':category',
-            $category,
-            $category === null ? PDO::PARAM_NULL : PDO::PARAM_STR
-        );
-
-        $result->execute();
-
-        $count = $result->fetchColumn();
-
-        $result->nextRowset();
-        $result->closeCursor();
-
-        return $count;
-    }
 
     /*
      * SEARCH

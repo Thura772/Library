@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Contract;
+
 /**
  * Defines methods for retrieving format, category,
  * and genre data from the data source.

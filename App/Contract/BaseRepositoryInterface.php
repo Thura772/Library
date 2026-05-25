@@ -1,5 +1,6 @@
 <?php
 
+namespace App\Contract;
 /*
  Base interface for all repository classes
  Provides common data access methods
@@ -8,9 +9,9 @@
 interface BaseRepositoryInterface
 {
     /*
-     Get total record count
+     Get single record by ID
     */
-    // public function count(array $filters = []): int;
+    public function getById(int $id);
 
     /*
      Get all records
@@ -21,7 +22,7 @@ interface BaseRepositoryInterface
     );
 
     /*
-     Get single record by ID
+     Get total record count
     */
-    public function getById(int $id);
+    public function count(array $filters = []): int;
 }

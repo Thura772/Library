@@ -1,5 +1,11 @@
 <?php
 
+namespace App\Service;
+
+use App\Contract\CatalogRepositoryInterface;
+use App\Repository\CatalogRepository;
+use App\Inc\Database;
+
 class CatalogService
 {
     private const ITEMS_PER_PAGE = 8;
@@ -176,9 +182,12 @@ class CatalogService
     }
 
     // Get total number of catalog items
-    public function get_catalog_count($category = null, $search = null)
+    public function get_catalog_count($category = null, $search = null): int
     {
-        return (int) $this->repo->count($category, $search);
+        return $this->repo->count([
+            'category' => $category,
+            'search' => $search
+        ]);
     }
 
     // Get all catalog items with pagination support
@@ -188,15 +197,31 @@ class CatalogService
     }
 
     // Get catalog items by category
-    public function category_catalog_array($id)
-    {
-        return $this->repo->getById($id);
+    public function category_catalog_array(
+        string $category,
+        ?int $limit = null,
+        int $offset = 0
+    ): array {
+        return $this->repo->getByCategory(
+            $category,
+            $limit,
+            $offset
+        );
     }
 
     // Search catalog items by keyword and category
-    public function search_catalog_array($search, $category = null, $limit = null, $offset = 0)
-    {
-        return $this->repo->getByCategory($search, $category, $limit, $offset);
+    public function search_catalog_array(
+        string $search,
+        ?string $category = null,
+        ?int $limit = null,
+        int $offset = 0
+    ): array {
+        return $this->repo->search(
+            $search,
+            $category,
+            $limit,
+            $offset
+        );
     }
 
     // Get random catalog items
@@ -208,6 +233,6 @@ class CatalogService
     // Get a single catalog item by ID
     public function single_item_array($id)
     {
-        return $this->repo->search($id);
+        return $this->repo->getById($id);
     }
 }

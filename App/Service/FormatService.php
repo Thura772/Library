@@ -1,9 +1,11 @@
 <?php
 
-/**
- * Handles format-related business logic and manages
- * communication between controllers and repositories.
- */
+namespace App\Service;
+
+use App\Contract\FormatRepositoryInterface;
+use App\Repository\FormatRepository;
+use App\inc\Database;
+
 
 class FormatService
 {
@@ -21,19 +23,19 @@ class FormatService
     }
 
     // Get format dropdown data
-    function format_array($category = null)
+    public function format_array($category = null)
     {
         return $this->repo->get_format_drop_down($category);
     }
 
     // Get category dropdown data
-    function category_drop_down()
+    public function category_drop_down()
     {
         return $this->repo->get_category_drop_down();
     }
 
     // Get genres dropdown data
-    function genres_array($category = null)
+    public function genres_array($category = null)
     {
         return $this->repo->get_genres_drop_down($category);
     }

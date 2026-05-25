@@ -264,7 +264,7 @@ DROP PROCEDURE IF EXISTS sp_get_item_full_detail;
 DELIMITER $$
 
 CREATE PROCEDURE sp_get_item_full_detail (
-    IN p_media_id INT  // IN for acccepting value //
+    IN p_media_id INT  
 )
 BEGIN
     SELECT

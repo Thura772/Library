@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Controller;
+
 /**
  * Base controller shared by all controllers.
  */
@@ -9,14 +11,18 @@ class BaseController
     /**
      * Render a view
      */
-    protected function view(
-        string $view,
-        array $data = []
-    ): void {
-
+    protected function view(string $view, array $data = []): void
+    {
         extract($data);
 
-        require BASE_PATH . "/view/{$view}.php";
+        $file = BASE_PATH . '/view/' . $view . '.php';
+
+
+        if (!file_exists($file)) {
+            die("View not found: " . $file);
+        }
+
+        require $file;
     }
 
     /**

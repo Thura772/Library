@@ -3,57 +3,53 @@
 <div class="section catalog page">
 	<div class="wrapper">
 
+		<!-- TITLE -->
 		<h1>
-			<?php
-			if (!empty($search)) {
-				echo 'Search results for "' . htmlspecialchars($search) . '"';
+			<?php if (!empty($search)): ?>
 
-				if (!empty($section)) {
-					echo ' in ' . ucfirst($section);
-				}
-			} else {
-				if (!empty($section)) {
-					echo "<a href='index.php?page=catalog'>Full Catalog</a> &gt; ";
-				}
+				Search results for "<?= htmlspecialchars($search) ?>"
 
-				echo htmlspecialchars($pageTitle);
-			}
-			?>
+				<?php if (!empty($section)): ?>
+					in <?= ucfirst($section) ?>
+				<?php endif; ?>
+
+			<?php else: ?>
+
+				<?= !empty($section) ? ucfirst($section) : 'Full Catalog' ?>
+
+			<?php endif; ?>
 		</h1>
 
-		<?php if ( $totalItems< 1): ?>  // this one also we need to fix.
+		<!-- CHECK DATA SAFELY -->
+		<?php if (isset($catalog) && count($catalog) === 0): ?>
 
-			<?php if (!empty($section) && $found_in_full_catalog > 0): ?>
+			<?php if (!empty($search) || !empty($section)): ?>
 
-				<p>You are searching in the wrong section. Please check again.</p>
+				<p>No items were found matching your request.</p>
 
 				<p>
-					<a href="index.php?page=catalog&s=<?= urlencode($search) ?>">
-						Search in the Full Catalog
-					</a>
+					<a href="index.php?page=catalog">Browse Full Catalog</a>
 				</p>
 
 			<?php else: ?>
 
-				<p>No items were found matching that search term.</p>
-
-				<p>
-					Search again or
-					<a href="index.php?page=catalog">Browse the Full Catalog.</a>
-				</p>
+				<p>No catalog items available.</p>
 
 			<?php endif; ?>
 
 		<?php else: ?>
 
+			<!-- PAGINATION -->
 			<?php require BASE_PATH . '/view/partials/pagination.php'; ?>
 
+			<!-- LIST -->
 			<ul class="catalog">
 				<?php foreach ($catalog as $item): ?>
 					<?= ItemView::render($item); ?>
 				<?php endforeach; ?>
 			</ul>
 
+			<!-- PAGINATION -->
 			<?php require BASE_PATH . '/view/partials/pagination.php'; ?>
 
 		<?php endif; ?>
