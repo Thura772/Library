@@ -3,10 +3,11 @@
 namespace App\Service;
 
 use App\Contract\UserRepositoryInterface;
+use App\Validation\Validator;
+use App\Validation\AuthValidator;
+use App\Model\User;
 
-
-
-class AuthService
+class AuthService extends BaseService
 {
     private UserRepositoryInterface $userRepository;
 
@@ -15,53 +16,94 @@ class AuthService
         $this->userRepository = $userRepository;
     }
 
-    /**
-     * Register user
-     * @return array errors (empty if success)
-     */
+    /*
+    | REGISTER
+    */
     public function register(array $data): array
-    {
-        $errors = [];
+{
+    $errors = Validator::validate(
+        $data,
+        AuthValidator::registerRules()
+    );
 
-        // 1. Name validation
-        if (empty($data['name'])) {
-            $errors['name'] = 'Name is required.';
-        }
-
-        // 2. Email validation
-        if (empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = 'A valid email is required.';
-        }
-
-        // 3. Password validation
-        if (empty($data['password']) || strlen($data['password']) < 6) {
-            $errors['password'] = 'Password must be at least 6 characters.';
-        }
-
-        // 4. Confirm password (safe check)
-        if (empty($data['confirm_password']) || $data['password'] !== $data['confirm_password']) {
-            $errors['confirm_password'] = 'Passwords do not match.';
-        }
-
-        if (!empty($errors)) {
-            return $errors;
-        }
-
-        // 5. Check duplicate email
-        if ($this->userRepository->findByEmail($data['email'])) {
-            return ['email' => 'This email is already registered.'];
-        }
-
-        // 6. Hash password
-        $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT);
-
-        // 7. Save user
-        $this->userRepository->create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'password' => $hashedPassword
-        ]);
-
-        return [];
+    if (!empty($errors)) {
+        return [
+            'success' => false,
+            'errors' => $errors,
+            'old' => $data
+        ];
     }
+
+    if ($this->userRepository->findByEmail($data['email'])) {
+        return [
+            'success' => false,
+            'errors' => [
+                'email' => 'This email is already registered.'
+            ],
+            'old' => $data
+        ];
+    }
+
+   $user = new User(
+    null,
+    $data['name'],
+    $data['email'],
+    password_hash($data['password'], PASSWORD_BCRYPT),
+    'user'
+);
+
+$this->userRepository->create($user);
+
+    return [
+        'success' => true,
+        'errors' => [],
+        'old' => []
+    ];
+}
+
+    /*
+    | LOGIN
+    */
+  public function login(array $data): array
+{
+    $errors = Validator::validate(
+        $data,
+        AuthValidator::loginRules()
+    );
+
+    if (!empty($errors)) {
+        return [
+            'errors' => $errors
+        ];
+    }
+
+    $user = $this->userRepository
+        ->findByEmail($data['email']);
+
+    if (
+        !$user ||
+        !password_verify(
+            $data['password'],
+            $user->getPassword()
+        )
+    ) {
+        return [
+            'errors' => [
+                'general' => 'Invalid email or password.'
+            ]
+        ];
+    }
+
+    return [
+        'errors' => [],
+        'user' => $user
+    ];
+}
+
+    public function logout(): void
+{
+    session_start();
+    $_SESSION = [];
+    session_destroy();
+}
 }

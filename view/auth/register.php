@@ -1,8 +1,13 @@
 <?php 
 // File: view/auth/register.php
 
+
+$errors = $errors ?? [];
+$old = $old ?? [];
+
+
 // 1. Include your existing top header template if your app uses one
-//include BASE_PATH . '/view/inc/header.php'; 
+//include BASE_PATH . '/view/inc/header.php';
 ?>
 
 <style>
@@ -124,9 +129,10 @@
             <div class="form-group">
                 <label for="email">Email Address</label>
                 <input type="email" id="email" name="email"
-                    class="form-control <?= !empty($errors['email']) ? 'is-invalid' : '' ?>"
+                    class="form-control <?= !empty($errors['email'] ?? null) ? 'is-invalid' : '' ?>"
                     value="<?= htmlspecialchars($old['email'] ?? '') ?>" placeholder="you@example.com">
-                <?php if (!empty($errors['email'])): ?>
+                <?php 
+                if (!empty($errors['email'])): ?>
                 <p class="error-feedback"><?= $errors['email'] ?></p>
                 <?php endif; ?>
             </div>

@@ -42,15 +42,37 @@ function handleWeb(string $page): void
     /*
     | AUTH ROUTE
     */
-    if ($page === 'register') {
+   /*
+| AUTH ROUTES
+*/
+if ($page === 'register') {
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $authController->register();
-        } else {
-            $authController->showRegisterForm();
-        }
-        return;
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $authController->register();
+    } else {
+        $authController->showRegisterForm();
     }
+
+    return;
+}
+
+if ($page === 'login') {
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $authController->login();
+    } else {
+        $authController->showLoginForm();
+    }
+
+    return;
+}
+
+if ($page === 'logout') {
+
+    $authController->logout();
+
+    return;
+}
 
     /*
     | NORMAL ROUTES

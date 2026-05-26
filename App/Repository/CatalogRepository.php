@@ -4,52 +4,110 @@ namespace App\Repository;
 
 use PDO;
 use App\Contract\CatalogRepositoryInterface;
-use App\Repository\BaseRepository;
 
-class CatalogRepository extends BaseRepository implements CatalogRepositoryInterface
+class CatalogRepository extends BaseRepository
+implements CatalogRepositoryInterface
 {
+    /*
+     * GET ALL
+     */
+    public function getAll(
+        ?int $limit = null,
+        int $offset = 0
+    ): array {
+
+        return $this->fetchAllProcedure(
+            'sp_get_full_catalog',
+            [$limit, $offset]
+        );
+    }
+
+    /*
+     * GET BY ID
+     */
+    public function getById(int $id): ?array
+    {
+        $stmt = $this->callProcedure(
+            'sp_get_item_full_detail',
+            [$id]
+        );
+
+        $item = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$item) {
+            $stmt->closeCursor();
+            return null;
+        }
+
+        $stmt->nextRowset();
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $item[strtolower($row['role'])][] =
+                $row['fullname'];
+        }
+
+        $stmt->closeCursor();
+
+        return $item;
+    }
+
+    /*
+     * COUNT
+     */
+    public function count(array $filters = []): int
+    {
+        $stmt = $this->callProcedure(
+            'sp_search_catalog_count',
+            [
+                $filters['search'] ?? null,
+                $filters['category'] ?? null
+            ]
+        );
+
+        $count = (int) $stmt->fetchColumn();
+
+        $stmt->closeCursor();
+
+        return $count;
+    }
+
     /*
      * GET BY CATEGORY
      */
-    public function getByCategory(string $category, ?int $limit = null, int $offset = 0): array
-    {
-        $stmt = $this->db->prepare("CALL sp_get_catalog(?, ?, ?)");
+    public function getByCategory(
+        string $category,
+        ?int $limit = null,
+        int $offset = 0
+    ): array {
 
-        $stmt->bindValue(1, $category, PDO::PARAM_STR);
-        $stmt->bindValue(2, $limit, $limit === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
-        $stmt->bindValue(3, $offset, PDO::PARAM_INT);
-
-        $stmt->execute();
-
-        $data = $stmt->fetchAll();
-        $stmt->closeCursor();
-
-        return $data;
+        return $this->fetchAllProcedure(
+            'sp_get_catalog',
+            [$category, $limit, $offset]
+        );
     }
-
 
     /*
      * SEARCH
      */
-    public function search(string $keyword, ?string $category = null, ?int $limit = null, int $offset = 0): array
-    {
-        $keyword = $keyword === '' ? null : $keyword;
-        $category = $category === '' ? null : $category;
+    public function search(
+        string $keyword,
+        ?string $category = null,
+        ?int $limit = null,
+        int $offset = 0
+    ): array {
 
-        $stmt = $this->db->prepare("CALL sp_search_catalog(?, ?, ?, ?)");
+        $keyword = $keyword ?: null;
+        $category = $category ?: null;
 
-        $stmt->bindValue(1, $keyword, $keyword ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(2, $category, $category ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(3, $limit, PDO::PARAM_INT);
-        $stmt->bindValue(4, $offset, PDO::PARAM_INT);
-
-        $stmt->execute();
-
-        $data = $stmt->fetchAll();
-        $stmt->nextRowset();
-        $stmt->closeCursor();
-
-        return $data;
+        return $this->fetchAllProcedure(
+            'sp_search_catalog',
+            [
+                $keyword,
+                $category,
+                $limit,
+                $offset
+            ]
+        );
     }
 
     /*
@@ -57,7 +115,10 @@ class CatalogRepository extends BaseRepository implements CatalogRepositoryInter
      */
     public function getRandom(): array
     {
-        $stmt = $this->db->query("SELECT * FROM view_random");
-        return $stmt->fetchAll();
+        $stmt = $this->query(
+            "SELECT * FROM view_random"
+        );
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

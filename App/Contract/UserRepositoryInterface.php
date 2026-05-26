@@ -2,9 +2,21 @@
 
 namespace App\Contract;
 
-interface UserRepositoryInterface extends BaseRepositoryInterface
-{
-    public function findByEmail(string $email): ?array;
+use App\Model\User;
 
-    public function create(array $data): bool;
+interface UserRepositoryInterface
+{
+    /*
+    | FIND USER BY EMAIL
+    */
+    public function findByEmail(
+        string $email
+    ): ?User;
+
+    /*
+    | CREATE USER
+    */
+    public function create(
+        User $user
+    ): bool;
 }

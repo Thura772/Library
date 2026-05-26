@@ -3,32 +3,64 @@
 namespace App\Repository;
 
 use PDO;
-use App\Repository\BaseRepository;
 use App\Contract\UserRepositoryInterface;
+use App\Model\User;
 
-class UserRepository extends BaseRepository implements UserRepositoryInterface
+class UserRepository extends BaseRepository
+implements UserRepositoryInterface
 {
-    public function findByEmail(string $email): ?array
-    {
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
-        $stmt->execute(['email' => $email]);
+    /*
+     * FIND USER BY EMAIL
+     */
+    public function findByEmail(
+    string $email
+): ?User {
 
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $this->query(
+        "
+        SELECT *
+        FROM users
+        WHERE email = :email
+        LIMIT 1
+        ",
+        ['email' => $email]
+    );
 
-        return $user ?: null;
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$data) {
+        return null;
     }
 
-    public function create(array $data): bool
-    {
-        $stmt = $this->db->prepare("
-            INSERT INTO users (name, email, password) 
-            VALUES (:name, :email, :password)
-        ");
+    return new User(
+        $data['id'],
+        $data['name'],
+        $data['email'],
+        $data['password'],
+        $data['role']
+    );
+}
 
-        return $stmt->execute([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'password' => $data['password']
-        ]);
+    /*
+     * CREATE USER
+     */
+    public function create(User $user): bool
+    {
+        $stmt = $this->query(
+            "
+        INSERT INTO users
+        (name, email, password, role)
+        VALUES
+        (:name, :email, :password, :role)
+        ",
+            [
+                'name' => $user->getName(),
+                'email' => $user->getEmail(),
+                'password' => $user->getPassword(),
+                'role' => $user->getRole()
+            ]
+        );
+
+        return $stmt->rowCount() > 0;
     }
 }

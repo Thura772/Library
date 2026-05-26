@@ -72,4 +72,21 @@ class BaseController
 
         exit;
     }
+    protected function requireAuth(): void
+{
+    if (empty($_SESSION['user'])) {
+
+        $this->redirect(
+            BASE_URL . '/Public/index.php?page=login'
+        );
+    }
+}
+protected function currentUser(): ?array
+{
+    return $_SESSION['user'] ?? null;
+}
+protected function isAuthenticated(): bool
+{
+    return !empty($_SESSION['user']);
+}
 }

@@ -3,10 +3,9 @@
 namespace App\Repository;
 
 use PDO;
-use App\Contract\BaseRepositoryInterface;
+use PDOStatement;
 
-
-abstract class BaseRepository implements BaseRepositoryInterface
+abstract class BaseRepository
 {
     protected PDO $db;
 
@@ -14,78 +13,90 @@ abstract class BaseRepository implements BaseRepositoryInterface
     {
         $this->db = $db;
     }
-    public function count(array $filters = []): int
-    {
-        $category = $filters['category'] ?? null;
-        $search = $filters['search'] ?? null;
 
-        $stmt = $this->db->prepare("CALL sp_search_catalog_count(:search, :category)");
+    /*
+     * EXECUTE STORED PROCEDURE
+     */
+    protected function callProcedure(
+        string $procedure,
+        array $params = []
+    ): PDOStatement {
 
-        $stmt->bindValue(':search', $search ?: null, $search ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':category', $category ?: null, $category ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $placeholders = '';
+
+        if (!empty($params)) {
+            $placeholders = implode(
+                ', ',
+                array_fill(0, count($params), '?')
+            );
+        }
+
+        $sql = "CALL {$procedure}({$placeholders})";
+
+        $stmt = $this->db->prepare($sql);
+
+        foreach ($params as $index => $value) {
+
+            $type = match (true) {
+                is_int($value)  => PDO::PARAM_INT,
+                is_null($value) => PDO::PARAM_NULL,
+                default         => PDO::PARAM_STR
+            };
+
+            $stmt->bindValue($index + 1, $value, $type);
+        }
 
         $stmt->execute();
 
-        $count = (int)$stmt->fetchColumn();
+        return $stmt;
+    }
 
-        $stmt->nextRowset();
+    /*
+     * FETCH ALL
+     */
+    protected function fetchAllProcedure(
+        string $procedure,
+        array $params = []
+    ): array {
+
+        $stmt = $this->callProcedure($procedure, $params);
+
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         $stmt->closeCursor();
 
-        return $count;
+        return $data;
     }
 
     /*
-     * GET ALL (BaseRepositoryInterface)
+     * FETCH SINGLE ROW
      */
-    public function getAll($limit = null, $offset = 0)
-    {
-        $result = $this->db->prepare(" CALL sp_get_full_catalog ( ? , ? )");
+    protected function fetchProcedure(
+        string $procedure,
+        array $params = []
+    ): ?array {
 
-        $result->bindParam(
-            1,
-            $limit,
-            $limit === null ? PDO::PARAM_NULL : PDO::PARAM_INT
-        );
+        $stmt = $this->callProcedure($procedure, $params);
 
-        $result->bindParam(2, $offset, PDO::PARAM_INT);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $result->execute();
+        $stmt->closeCursor();
 
-        $catalog = $result->fetchAll();
-
-        $result->closeCursor();
-
-        return $catalog;
+        return $data ?: null;
     }
 
     /*
-     * GET BY ID (BaseRepositoryInterface)
+     * EXECUTE NORMAL QUERY
      */
-    public function getById($id)
-    {
-        $result = $this->db->prepare("CALL sp_get_item_full_detail (?)");
+    protected function query(
+        string $sql,
+        array $params = []
+    ): PDOStatement {
 
-        $result->bindParam(1, $id, PDO::PARAM_INT);
+        $stmt = $this->db->prepare($sql);
 
-        $result->execute();
+        $stmt->execute($params);
 
-        $item = $result->fetch(PDO::FETCH_ASSOC);
-
-        // Return null if item does not exist
-        if ($item === false) {
-            $result->closeCursor();
-            return null;
-        }
-
-        $result->nextRowset();
-
-        // Load related people data (actors, authors, etc.)
-        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-            $item[strtolower($row['role'])][] = $row['fullname'];
-        }
-
-        $result->closeCursor();
-
-        return $item;
+        return $stmt;
     }
 }
