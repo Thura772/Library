@@ -49,7 +49,8 @@ class AuthController extends BaseController
             return;
         }
 
-        $result = $this->service->register($request);
+        // CHANGED: pass only array, NOT request object
+        $result = $this->service->register($request->data());
 
         if (!$result['success']) {
             $this->view('auth/register', [
@@ -98,7 +99,8 @@ class AuthController extends BaseController
             return;
         }
 
-        $result = $this->service->login($request);
+        // CHANGED: pass array instead of request object
+        $result = $this->service->login($request->data());
 
         if (!empty($result['errors'])) {
             $this->view('auth/login', [
@@ -109,10 +111,8 @@ class AuthController extends BaseController
             return;
         }
 
-        // SECURITY FIX
         session_regenerate_id(true);
 
-        // STORE USER SESSION (DTO)
         $_SESSION['user'] = $result['user']->toArray();
 
         $this->redirect(BASE_URL . '/Public/index.php');
@@ -131,9 +131,7 @@ class AuthController extends BaseController
 
         $this->service->logout();
 
-        // extra safety cleanup
         $_SESSION = [];
-
         session_destroy();
 
         $this->redirect(BASE_URL . '/Public/index.php?page=login');

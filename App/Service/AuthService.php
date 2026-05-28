@@ -5,8 +5,6 @@ namespace App\Service;
 use App\Repository\UserRepository;
 use App\Factory\UserFactory;
 use App\Mapper\UserMapper;
-use App\Http\Request\RegisterRequest;
-use App\Http\Request\LoginRequest;
 
 class AuthService
 {
@@ -19,9 +17,9 @@ class AuthService
     | REGISTER
     |--------------------------------------------------------------------------
     */
-    public function register(RegisterRequest $request): array
+    public function register(array $data): array // CHANGED: RegisterRequest → array
     {
-        if ($this->repo->findByEmail($request->data()['email'])) {
+        if ($this->repo->findByEmail($data['email'])) { // CHANGED: $request->data() removed
             return [
                 'success' => false,
                 'errors' => [
@@ -30,8 +28,6 @@ class AuthService
                 'user' => null
             ];
         }
-
-        $data = $request->data();
 
         $user = UserFactory::register(
             $data['name'],
@@ -44,7 +40,7 @@ class AuthService
         return [
             'success' => true,
             'errors' => [],
-            'user' => UserMapper::toDTO($user) // ✅ DTO preserved
+            'user' => UserMapper::toDTO($user)
         ];
     }
 
@@ -53,11 +49,9 @@ class AuthService
     | LOGIN
     |--------------------------------------------------------------------------
     */
-    public function login(LoginRequest $request): array
+    public function login(array $data): array // CHANGED: LoginRequest → array
     {
-        $data = $request->data();
-
-        $user = $this->repo->findByEmail($data['email']);
+        $user = $this->repo->findByEmail($data['email']); // CHANGED
 
         if (!$user || !$user->verifyPassword($data['password'])) {
             return [
@@ -72,10 +66,15 @@ class AuthService
         return [
             'success' => true,
             'errors' => [],
-            'user' => UserMapper::toDTO($user) // ✅ DTO preserved
+            'user' => UserMapper::toDTO($user)
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | LOGOUT
+    |--------------------------------------------------------------------------
+    */
     public function logout(): void
     {
         if (session_status() === PHP_SESSION_NONE) {

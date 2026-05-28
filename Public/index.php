@@ -6,7 +6,7 @@ define('BASE_URL', '/MediaLibrary-MVC-');
 
 require_once __DIR__ . '/../vendor/autoload.php';
 $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
-$dotenv->load();
+$dotenv->load(); 
 
 session_start();
 require_once BASE_PATH . '/view/ItemView.php';
