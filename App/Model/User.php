@@ -4,64 +4,33 @@ namespace App\Model;
 
 class User
 {
-    private ?int $id;
-    private string $name;
-    private string $email;
-    private string $password;
-    private string $role;
+    private function __construct(
+        private ?int $id,
+        private string $name,
+        private string $email,
+        private string $passwordHash,
+        private string $role
+    ) {}
 
-    public function __construct(
-        ?int $id,
-        string $name,
-        string $email,
-        string $password,
-        string $role = 'user'
-    ) {
-        $this->id = $id;
-        $this->name = $name;
-        $this->email = $email;
-        $this->password = $password;
-        $this->role = $role;
+    public static function fromDatabase(array $data): self
+    {
+        return new self(
+            $data['id'] ? (int)$data['id'] : null,
+            $data['name'],
+            $data['email'],
+            $data['password'],
+            $data['role']
+        );
     }
 
-    /*
-    | GETTERS
-    */
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    public function getId() { return $this->id; }
+    public function getName() { return $this->name; }
+    public function getEmail() { return $this->email; }
+    public function getRole() { return $this->role; }
+    public function getPasswordHash() { return $this->passwordHash; }
 
-    public function getName(): string
+    public function verifyPassword(string $password): bool
     {
-        return $this->name;
-    }
-
-    public function getEmail(): string
-    {
-        return $this->email;
-    }
-
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
-    public function getRole(): string
-    {
-        return $this->role;
-    }
-
-    /*
-    | TO ARRAY
-    */
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
-            'role' => $this->role
-        ];
+        return password_verify($password, $this->passwordHash);
     }
 }

@@ -1,28 +1,35 @@
 <?php
 
 namespace App\Contract;
-/*
- Base interface for all repository classes
- Provides common data access methods
-*/
 
 interface BaseRepositoryInterface
 {
     /*
-     Get single record by ID
+    |--------------------------------------------------------------------------
+    | GET BY ID
+    |--------------------------------------------------------------------------
     */
-    public function getById(int $id);
+
+    public function getById(
+        int $id
+    ): mixed;
 
     /*
-     Get all records
+    |--------------------------------------------------------------------------
+    | GET ALL
+    |--------------------------------------------------------------------------
     */
+
     public function getAll(
         ?int $limit = null,
         int $offset = 0
-    );
+    ): array;
 
     /*
-     Get total record count
+    |--------------------------------------------------------------------------
+    | COUNT
+    |--------------------------------------------------------------------------
     */
-    public function count(array $filters = []): int;
+
+    public function count(): int;
 }

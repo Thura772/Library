@@ -2,108 +2,87 @@
 
 namespace App\Service;
 
-use App\Contract\UserRepositoryInterface;
-use App\Validation\Validator;
-use App\Validation\AuthValidator;
-use App\Model\User;
+use App\Repository\UserRepository;
+use App\Factory\UserFactory;
+use App\Mapper\UserMapper;
+use App\Http\Request\RegisterRequest;
+use App\Http\Request\LoginRequest;
 
-class AuthService extends BaseService
+class AuthService
 {
-    private UserRepositoryInterface $userRepository;
-
-    public function __construct(UserRepositoryInterface $userRepository)
-    {
-        $this->userRepository = $userRepository;
-    }
+    public function __construct(
+        private UserRepository $repo
+    ) {}
 
     /*
+    |--------------------------------------------------------------------------
     | REGISTER
+    |--------------------------------------------------------------------------
     */
-    public function register(array $data): array
-{
-    $errors = Validator::validate(
-        $data,
-        AuthValidator::registerRules()
-    );
+    public function register(RegisterRequest $request): array
+    {
+        if ($this->repo->findByEmail($request->data()['email'])) {
+            return [
+                'success' => false,
+                'errors' => [
+                    'email' => 'This email is already registered.'
+                ],
+                'user' => null
+            ];
+        }
 
-    if (!empty($errors)) {
+        $data = $request->data();
+
+        $user = UserFactory::register(
+            $data['name'],
+            $data['email'],
+            $data['password']
+        );
+
+        $this->repo->create($user);
+
         return [
-            'success' => false,
-            'errors' => $errors,
-            'old' => $data
+            'success' => true,
+            'errors' => [],
+            'user' => UserMapper::toDTO($user) // ✅ DTO preserved
         ];
     }
-
-    if ($this->userRepository->findByEmail($data['email'])) {
-        return [
-            'success' => false,
-            'errors' => [
-                'email' => 'This email is already registered.'
-            ],
-            'old' => $data
-        ];
-    }
-
-   $user = new User(
-    null,
-    $data['name'],
-    $data['email'],
-    password_hash($data['password'], PASSWORD_BCRYPT),
-    'user'
-);
-
-$this->userRepository->create($user);
-
-    return [
-        'success' => true,
-        'errors' => [],
-        'old' => []
-    ];
-}
 
     /*
+    |--------------------------------------------------------------------------
     | LOGIN
+    |--------------------------------------------------------------------------
     */
-  public function login(array $data): array
-{
-    $errors = Validator::validate(
-        $data,
-        AuthValidator::loginRules()
-    );
+    public function login(LoginRequest $request): array
+    {
+        $data = $request->data();
 
-    if (!empty($errors)) {
+        $user = $this->repo->findByEmail($data['email']);
+
+        if (!$user || !$user->verifyPassword($data['password'])) {
+            return [
+                'success' => false,
+                'errors' => [
+                    'general' => 'Invalid email or password.'
+                ],
+                'user' => null
+            ];
+        }
+
         return [
-            'errors' => $errors
+            'success' => true,
+            'errors' => [],
+            'user' => UserMapper::toDTO($user) // ✅ DTO preserved
         ];
     }
-
-    $user = $this->userRepository
-        ->findByEmail($data['email']);
-
-    if (
-        !$user ||
-        !password_verify(
-            $data['password'],
-            $user->getPassword()
-        )
-    ) {
-        return [
-            'errors' => [
-                'general' => 'Invalid email or password.'
-            ]
-        ];
-    }
-
-    return [
-        'errors' => [],
-        'user' => $user
-    ];
-}
 
     public function logout(): void
-{
-    session_start();
-    $_SESSION = [];
-    session_destroy();
-}
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $_SESSION = [];
+        session_destroy();
+    }
 }

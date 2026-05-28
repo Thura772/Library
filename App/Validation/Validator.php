@@ -12,10 +12,10 @@ class Validator
 
             $value = $data[$field] ?? null;
 
-            foreach ($fieldRules as $rule) {
+            foreach ($fieldRules as $ruleKey => $ruleValue) {
 
                 // REQUIRED
-                if ($rule === 'required') {
+                if ($ruleKey === 'required' && $ruleValue === true) {
                     if (empty($value) && $value !== '0') {
                         $errors[$field] = ucfirst($field) . ' is required.';
                         break;
@@ -23,36 +23,38 @@ class Validator
                 }
 
                 // EMAIL
-                if ($rule === 'email') {
-                    if (!empty($value) &&
-                        !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                if ($ruleKey === 'email' && $ruleValue === true) {
+                    if (!empty($value) && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
                         $errors[$field] = 'Invalid email format.';
                         break;
                     }
                 }
 
                 // MIN
-                if (str_starts_with($rule, 'min:')) {
-                    $min = (int) explode(':', $rule)[1];
-
-                    if (!empty($value) && strlen($value) < $min) {
-                        $errors[$field] =
-                            ucfirst($field) .
-                            " must be at least $min characters.";
+                if ($ruleKey === 'min') {
+                    if (!empty($value) && strlen($value) < $ruleValue) {
+                        $errors[$field] = ucfirst($field) . " must be at least $ruleValue characters.";
                         break;
                     }
                 }
 
-                // CONFIRMED
-                if ($rule === 'confirmed') {
+                // MAX
+                if ($ruleKey === 'max') {
+                    if (!empty($value) && strlen($value) > $ruleValue) {
+                        $errors[$field] = ucfirst($field) . " must not exceed $ruleValue characters.";
+                        break;
+                    }
+                }
 
-    $confirmField = 'confirm_' . $field;
+                // MATCH (IMPORTANT FIX)
+                if ($ruleKey === 'match') {
+                    $matchValue = $data[$ruleValue] ?? null;
 
-    if (($data[$field] ?? null) !== ($data[$confirmField] ?? null)) {
-        $errors[$field] = 'Passwords do not match.';
-        break;
-    }
-}
+                    if ($value !== $matchValue) {
+                        $errors[$field] = ucfirst($field) . ' does not match.';
+                        break;
+                    }
+                }
             }
         }
 
