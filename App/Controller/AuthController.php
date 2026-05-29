@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Service\AuthService;
 use App\Http\Request\RegisterRequest;
 use App\Http\Request\LoginRequest;
+use App\Exceptions\ValidationException;
 
 class AuthController extends BaseController
 {
@@ -12,11 +13,6 @@ class AuthController extends BaseController
         private AuthService $service
     ) {}
 
-    /*
-    |--------------------------------------------------------------------------
-    | SHOW REGISTER FORM
-    |--------------------------------------------------------------------------
-    */
     public function showRegisterForm(): void
     {
         $this->view('auth/register', [
@@ -26,11 +22,6 @@ class AuthController extends BaseController
         ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | REGISTER
-    |--------------------------------------------------------------------------
-    */
     public function register(): void
     {
         $request = new RegisterRequest([
@@ -40,28 +31,15 @@ class AuthController extends BaseController
             'confirm_password' => $this->post('confirm_password', '')
         ]);
 
-        $result = $this->handleRequest(
-            $request,
-            'auth/register',
-            'Create Account',
-            fn ($data) => $this->service->register($data)
-        );
-
-        if (!$result) {
-            return;
+        if ($request->fails()) {
+            throw new ValidationException($request->errors());
         }
 
-        $this->redirect(
-            BASE_URL .
-            '/Public/index.php?page=login'
-        );
+        $this->service->register($request->data());
+
+        //$this->redirect(BASE_URL . '/Public/index.php?page=login');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SHOW LOGIN FORM
-    |--------------------------------------------------------------------------
-    */
     public function showLoginForm(): void
     {
         $this->view('auth/login', [
@@ -71,11 +49,6 @@ class AuthController extends BaseController
         ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LOGIN
-    |--------------------------------------------------------------------------
-    */
     public function login(): void
     {
         $request = new LoginRequest([
@@ -83,54 +56,22 @@ class AuthController extends BaseController
             'password' => $this->post('password', '')
         ]);
 
-        $result = $this->handleRequest(
-            $request,
-            'auth/login',
-            'Login',
-            fn ($data) => $this->service->login($data)
-        );
-
-        if (!$result) {
-            return;
+        if ($request->fails()) {
+            throw new ValidationException($request->errors());
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | SECURITY
-        |--------------------------------------------------------------------------
-        */
+        $result = $this->service->login($request->data());
+
         session_regenerate_id(true);
 
-        /*
-        |--------------------------------------------------------------------------
-        | STORE USER
-        |--------------------------------------------------------------------------
-        */
-        $_SESSION['user'] =
-            $result->data->toArray();
+        $_SESSION['user'] = $result->data->toArray();
 
-        /*
-        |--------------------------------------------------------------------------
-        | SUCCESS
-        |--------------------------------------------------------------------------
-        */
-        $this->redirect(
-            BASE_URL .
-            '/Public/index.php'
-        );
+        $this->redirect(BASE_URL . '/Public/index.php');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LOGOUT
-    |--------------------------------------------------------------------------
-    */
     public function logout(): void
     {
-        if (
-            session_status() ===
-            PHP_SESSION_NONE
-        ) {
+        if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
@@ -140,9 +81,6 @@ class AuthController extends BaseController
 
         session_destroy();
 
-        $this->redirect(
-            BASE_URL .
-            '/Public/index.php?page=login'
-        );
+        $this->redirect(BASE_URL . '/Public/index.php?page=login');
     }
 }

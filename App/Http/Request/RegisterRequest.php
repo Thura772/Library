@@ -27,4 +27,21 @@ class RegisterRequest extends FormRequest
             ]
         ];
     }
+
+    public function toArray(): array
+    {
+        return [
+            'name' => trim($this->data()['name'] ?? ''),
+            'email' => strtolower(trim($this->data()['email'] ?? '')),
+            'password' => $this->data()['password'] ?? ''
+        ];
+    }
+
+    public function isStrongPassword(): bool
+    {
+        $password = $this->data()['password'] ?? '';
+
+        return preg_match('/[A-Z]/', $password)
+            && preg_match('/[0-9]/', $password);
+    }
 }

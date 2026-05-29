@@ -10,49 +10,65 @@ class Validator
 
         foreach ($rules as $field => $fieldRules) {
 
-            $value = $data[$field] ?? null;
+            $value = isset($data[$field])
+                ? trim((string)$data[$field])
+                : null;
 
-            foreach ($fieldRules as $ruleKey => $ruleValue) {
+            foreach ($fieldRules as $rule => $ruleValue) {
 
-                // REQUIRED
-                if ($ruleKey === 'required' && $ruleValue === true) {
-                    if (empty($value) && $value !== '0') {
-                        $errors[$field] = ucfirst($field) . ' is required.';
-                        break;
+                /*
+                | REQUIRED (FIXED)
+                */
+                if ($rule === 'required' && $ruleValue === true) {
+
+                    if ($value === null || $value === '') {
+                        $errors[$field][] = ucfirst($field) . ' is required.';
+                        continue 2; // stop all rules for this field
                     }
                 }
 
-                // EMAIL
-                if ($ruleKey === 'email' && $ruleValue === true) {
-                    if (!empty($value) && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                        $errors[$field] = 'Invalid email format.';
-                        break;
+                /*
+                | EMAIL
+                */
+                if ($rule === 'email' && $ruleValue === true) {
+
+                    if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        $errors[$field][] = 'Invalid email format.';
                     }
                 }
 
-                // MIN
-                if ($ruleKey === 'min') {
-                    if (!empty($value) && strlen($value) < $ruleValue) {
-                        $errors[$field] = ucfirst($field) . " must be at least $ruleValue characters.";
-                        break;
+                /*
+                | MIN
+                */
+                if ($rule === 'min') {
+
+                    if (strlen($value) < $ruleValue) {
+                        $errors[$field][] =
+                            ucfirst($field) . " must be at least $ruleValue characters.";
                     }
                 }
 
-                // MAX
-                if ($ruleKey === 'max') {
-                    if (!empty($value) && strlen($value) > $ruleValue) {
-                        $errors[$field] = ucfirst($field) . " must not exceed $ruleValue characters.";
-                        break;
+                /*
+                | MAX
+                */
+                if ($rule === 'max') {
+
+                    if (strlen($value) > $ruleValue) {
+                        $errors[$field][] =
+                            ucfirst($field) . " must not exceed $ruleValue characters.";
                     }
                 }
 
-                // MATCH (IMPORTANT FIX)
-                if ($ruleKey === 'match') {
+                /*
+                | MATCH
+                */
+                if ($rule === 'match') {
+
                     $matchValue = $data[$ruleValue] ?? null;
 
                     if ($value !== $matchValue) {
-                        $errors[$field] = ucfirst($field) . ' does not match.';
-                        break;
+                        $errors[$field][] =
+                            ucfirst($field) . ' does not match.';
                     }
                 }
             }

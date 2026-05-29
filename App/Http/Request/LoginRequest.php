@@ -9,12 +9,21 @@ class LoginRequest extends FormRequest
         return [
             'email' => [
                 'required' => true,
-                'email' => true
+                'email' => true,
+                'max' => 100
             ],
             'password' => [
                 'required' => true,
                 'min' => 6
             ]
+        ];
+    }
+
+    public function credentials(): array
+    {
+        return [
+            'email' => strtolower(trim($this->data()['email'] ?? '')),
+            'password' => $this->data()['password'] ?? ''
         ];
     }
 }

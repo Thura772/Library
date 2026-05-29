@@ -6,6 +6,7 @@ use App\Repository\UserRepository;
 use App\Factory\UserFactory;
 use App\Mapper\UserMapper;
 use App\Response\ServiceResponse;
+use App\Exceptions\ValidationException;
 
 class AuthService
 {
@@ -22,11 +23,9 @@ class AuthService
         array $data
     ): ServiceResponse {
 
-        if (
-            $this->repo->findByEmail($data['email'])
-        ) {
+        if ($this->repo->findByEmail($data['email'])) {
 
-            return ServiceResponse::error([
+            throw new ValidationException([
                 'email' =>
                     'This email is already registered.'
             ]);
@@ -63,7 +62,7 @@ class AuthService
             !$user->verifyPassword($data['password'])
         ) {
 
-            return ServiceResponse::error([
+            throw new ValidationException([
                 'general' =>
                     'Invalid email or password.'
             ]);

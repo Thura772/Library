@@ -4,17 +4,18 @@ namespace App\Http\Request;
 
 use App\Validation\Validator;
 
-abstract class FormRequest
+abstract class FormRequest extends BaseRequest
 {
-    protected array $data;
     protected array $errors = [];
 
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
 
-        // ✅ AUTO VALIDATION
-        $this->errors = Validator::validate($this->data, static::rules());
+        $this->errors = Validator::validate(
+            $this->data,
+            static::rules()
+        );
     }
 
     abstract public static function rules(): array;
@@ -32,5 +33,11 @@ abstract class FormRequest
     public function data(): array
     {
         return $this->data;
+    }
+
+    // compatibility
+    public function validate(): array
+    {
+        return $this->errors;
     }
 }

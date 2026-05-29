@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\NotFoundException;
 use App\Controller\CatalogController;
 use App\Controller\DetailsController;
 use App\Controller\SuggestController;
@@ -89,8 +90,7 @@ if ($page === 'logout') {
         case 'catalog':
             (new CatalogController($catalogService))->index();
             break;
-        default:
-            (new CatalogController($catalogService))->home();
-            break;
+       default:
+    throw new NotFoundException();
     }
 }

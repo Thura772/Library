@@ -122,54 +122,51 @@ class BaseController
     | HANDLE FORM REQUEST
     |--------------------------------------------------------------------------
     */
-    protected function handleRequest(
-        object $request,
-        string $view,
-        string $pageTitle,
-        callable $callback
-    ): mixed {
+   protected function handleRequest(
+    $request,
+    string $view,
+    string $title,
+    callable $callback
+): mixed {
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDATION FAIL
-        |--------------------------------------------------------------------------
-        */
-        if ($request->fails()) {
+    $errors = $request->errors();
 
-            $this->view($view, [
-                'pageTitle' => $pageTitle,
-                'errors' => $request->errors(),
-                'old' => $request->data()
-            ]);
+    if (!empty($errors)) {
+        $this->view($view, [
+            'pageTitle' => $title,
+            'errors' => $errors,
+            'old' => $request->all()
+        ]);
 
-            return null;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | SERVICE
-        |--------------------------------------------------------------------------
-        */
-        $result = $callback(
-            $request->data()
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | SERVICE FAIL
-        |--------------------------------------------------------------------------
-        */
-        if (!$result->success) {
-
-            $this->view($view, [
-                'pageTitle' => $pageTitle,
-                'errors' => $result->errors,
-                'old' => $request->data()
-            ]);
-
-            return null;
-        }
-
-        return $result;
+        return false;
     }
+
+    try {
+
+        return $callback($request->all());
+
+    } catch (\App\Exceptions\ValidationException $e) {
+
+        $this->view($view, [
+            'pageTitle' => $title,
+            'errors' => $e->getErrors(),
+            'old' => $request->all()
+        ]);
+
+        return false;
+
+    } catch (\Throwable $e) {
+
+        //  THIS IS WHAT PREVENTS WHITE PAGE
+        error_log($e);
+
+        $this->view('errors/500', [
+            'pageTitle' => 'Error',
+            'errors' => ['general' => 'Something went wrong'],
+            'old' => []
+        ]);
+
+        return false;
+    }
+}
 }

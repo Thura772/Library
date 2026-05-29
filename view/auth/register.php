@@ -114,7 +114,7 @@ $old = $old ?? [];
 
         <h2 class="register-title">Create Account</h2>
 
-        <form action="index.php?page=register" method="POST">
+        <form action="<?= BASE_URL ?>/Public/index.php?page=register" method="POST">
 
             <div class="form-group">
                 <label for="name">Full Name</label>
