@@ -40,28 +40,21 @@ class AuthController extends BaseController
             'confirm_password' => $this->post('confirm_password', '')
         ]);
 
-        if ($request->fails()) {
-            $this->view('auth/register', [
-                'pageTitle' => 'Create Account',
-                'errors' => $request->errors(),
-                'old' => $request->data()
-            ]);
+        $result = $this->handleRequest(
+            $request,
+            'auth/register',
+            'Create Account',
+            fn ($data) => $this->service->register($data)
+        );
+
+        if (!$result) {
             return;
         }
 
-        // CHANGED: pass only array, NOT request object
-        $result = $this->service->register($request->data());
-
-        if (!$result['success']) {
-            $this->view('auth/register', [
-                'pageTitle' => 'Create Account',
-                'errors' => $result['errors'],
-                'old' => $request->data()
-            ]);
-            return;
-        }
-
-        $this->redirect(BASE_URL . '/Public/index.php?page=login');
+        $this->redirect(
+            BASE_URL .
+            '/Public/index.php?page=login'
+        );
     }
 
     /*
@@ -90,32 +83,41 @@ class AuthController extends BaseController
             'password' => $this->post('password', '')
         ]);
 
-        if ($request->fails()) {
-            $this->view('auth/login', [
-                'pageTitle' => 'Login',
-                'errors' => $request->errors(),
-                'old' => $request->data()
-            ]);
+        $result = $this->handleRequest(
+            $request,
+            'auth/login',
+            'Login',
+            fn ($data) => $this->service->login($data)
+        );
+
+        if (!$result) {
             return;
         }
 
-        // CHANGED: pass array instead of request object
-        $result = $this->service->login($request->data());
-
-        if (!empty($result['errors'])) {
-            $this->view('auth/login', [
-                'pageTitle' => 'Login',
-                'errors' => $result['errors'],
-                'old' => $request->data()
-            ]);
-            return;
-        }
-
+        /*
+        |--------------------------------------------------------------------------
+        | SECURITY
+        |--------------------------------------------------------------------------
+        */
         session_regenerate_id(true);
 
-        $_SESSION['user'] = $result['user']->toArray();
+        /*
+        |--------------------------------------------------------------------------
+        | STORE USER
+        |--------------------------------------------------------------------------
+        */
+        $_SESSION['user'] =
+            $result->data->toArray();
 
-        $this->redirect(BASE_URL . '/Public/index.php');
+        /*
+        |--------------------------------------------------------------------------
+        | SUCCESS
+        |--------------------------------------------------------------------------
+        */
+        $this->redirect(
+            BASE_URL .
+            '/Public/index.php'
+        );
     }
 
     /*
@@ -125,15 +127,22 @@ class AuthController extends BaseController
     */
     public function logout(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
+        if (
+            session_status() ===
+            PHP_SESSION_NONE
+        ) {
             session_start();
         }
 
         $this->service->logout();
 
         $_SESSION = [];
+
         session_destroy();
 
-        $this->redirect(BASE_URL . '/Public/index.php?page=login');
+        $this->redirect(
+            BASE_URL .
+            '/Public/index.php?page=login'
+        );
     }
 }

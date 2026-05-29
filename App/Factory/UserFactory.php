@@ -12,7 +12,7 @@ class UserFactory
         string $plainPassword
     ): User {
 
-        // ❌ NO VALIDATION HERE ANYMORE
+        //  NO VALIDATION HERE ANYMORE
 
         $hash = password_hash($plainPassword, PASSWORD_BCRYPT);
 

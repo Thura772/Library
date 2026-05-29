@@ -2,21 +2,21 @@
 
 namespace App\Controller;
 
-/**
- * Base controller shared by all controllers.
- */
-
 class BaseController
 {
-    /**
-     * Render a view
-     */
-    protected function view(string $view, array $data = []): void
-    {
+    /*
+    |--------------------------------------------------------------------------
+    | VIEW
+    |--------------------------------------------------------------------------
+    */
+    protected function view(
+        string $view,
+        array $data = []
+    ): void {
+
         extract($data);
 
         $file = BASE_PATH . '/view/' . $view . '.php';
-
 
         if (!file_exists($file)) {
             die("View not found: " . $file);
@@ -25,9 +25,11 @@ class BaseController
         require $file;
     }
 
-    /**
-     * Redirect to another page
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | REDIRECT
+    |--------------------------------------------------------------------------
+    */
     protected function redirect(
         string $url
     ): void {
@@ -36,9 +38,11 @@ class BaseController
         exit;
     }
 
-    /**
-     * Get GET request input
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | GET INPUT
+    |--------------------------------------------------------------------------
+    */
     protected function get(
         string $key,
         $default = null
@@ -46,9 +50,11 @@ class BaseController
         return $_GET[$key] ?? $default;
     }
 
-    /**
-     * Get POST request input
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | POST INPUT
+    |--------------------------------------------------------------------------
+    */
     protected function post(
         string $key,
         $default = null
@@ -56,9 +62,11 @@ class BaseController
         return $_POST[$key] ?? $default;
     }
 
-    /**
-     * Return JSON response
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | JSON RESPONSE
+    |--------------------------------------------------------------------------
+    */
     protected function json(
         $data,
         int $status = 200
@@ -72,21 +80,96 @@ class BaseController
 
         exit;
     }
-    protected function requireAuth(): void
-{
-    if (empty($_SESSION['user'])) {
 
-        $this->redirect(
-            BASE_URL . '/Public/index.php?page=login'
-        );
+    /*
+    |--------------------------------------------------------------------------
+    | AUTH
+    |--------------------------------------------------------------------------
+    */
+    protected function requireAuth(): void
+    {
+        if (empty($_SESSION['user'])) {
+
+            $this->redirect(
+                BASE_URL .
+                '/Public/index.php?page=login'
+            );
+        }
     }
-}
-protected function currentUser(): ?array
-{
-    return $_SESSION['user'] ?? null;
-}
-protected function isAuthenticated(): bool
-{
-    return !empty($_SESSION['user']);
-}
+
+    /*
+    |--------------------------------------------------------------------------
+    | CURRENT USER
+    |--------------------------------------------------------------------------
+    */
+    protected function currentUser(): ?array
+    {
+        return $_SESSION['user'] ?? null;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHECK AUTH
+    |--------------------------------------------------------------------------
+    */
+    protected function isAuthenticated(): bool
+    {
+        return !empty($_SESSION['user']);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | HANDLE FORM REQUEST
+    |--------------------------------------------------------------------------
+    */
+    protected function handleRequest(
+        object $request,
+        string $view,
+        string $pageTitle,
+        callable $callback
+    ): mixed {
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDATION FAIL
+        |--------------------------------------------------------------------------
+        */
+        if ($request->fails()) {
+
+            $this->view($view, [
+                'pageTitle' => $pageTitle,
+                'errors' => $request->errors(),
+                'old' => $request->data()
+            ]);
+
+            return null;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SERVICE
+        |--------------------------------------------------------------------------
+        */
+        $result = $callback(
+            $request->data()
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | SERVICE FAIL
+        |--------------------------------------------------------------------------
+        */
+        if (!$result->success) {
+
+            $this->view($view, [
+                'pageTitle' => $pageTitle,
+                'errors' => $result->errors,
+                'old' => $request->data()
+            ]);
+
+            return null;
+        }
+
+        return $result;
+    }
 }

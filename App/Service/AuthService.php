@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Repository\UserRepository;
 use App\Factory\UserFactory;
 use App\Mapper\UserMapper;
+use App\Response\ServiceResponse;
 
 class AuthService
 {
@@ -17,16 +18,18 @@ class AuthService
     | REGISTER
     |--------------------------------------------------------------------------
     */
-    public function register(array $data): array // CHANGED: RegisterRequest → array
-    {
-        if ($this->repo->findByEmail($data['email'])) { // CHANGED: $request->data() removed
-            return [
-                'success' => false,
-                'errors' => [
-                    'email' => 'This email is already registered.'
-                ],
-                'user' => null
-            ];
+    public function register(
+        array $data
+    ): ServiceResponse {
+
+        if (
+            $this->repo->findByEmail($data['email'])
+        ) {
+
+            return ServiceResponse::error([
+                'email' =>
+                    'This email is already registered.'
+            ]);
         }
 
         $user = UserFactory::register(
@@ -37,11 +40,9 @@ class AuthService
 
         $this->repo->create($user);
 
-        return [
-            'success' => true,
-            'errors' => [],
-            'user' => UserMapper::toDTO($user)
-        ];
+        return ServiceResponse::success(
+            UserMapper::toDTO($user)
+        );
     }
 
     /*
@@ -49,25 +50,28 @@ class AuthService
     | LOGIN
     |--------------------------------------------------------------------------
     */
-    public function login(array $data): array // CHANGED: LoginRequest → array
-    {
-        $user = $this->repo->findByEmail($data['email']); // CHANGED
+    public function login(
+        array $data
+    ): ServiceResponse {
 
-        if (!$user || !$user->verifyPassword($data['password'])) {
-            return [
-                'success' => false,
-                'errors' => [
-                    'general' => 'Invalid email or password.'
-                ],
-                'user' => null
-            ];
+        $user = $this->repo->findByEmail(
+            $data['email']
+        );
+
+        if (
+            !$user ||
+            !$user->verifyPassword($data['password'])
+        ) {
+
+            return ServiceResponse::error([
+                'general' =>
+                    'Invalid email or password.'
+            ]);
         }
 
-        return [
-            'success' => true,
-            'errors' => [],
-            'user' => UserMapper::toDTO($user)
-        ];
+        return ServiceResponse::success(
+            UserMapper::toDTO($user)
+        );
     }
 
     /*
@@ -77,11 +81,14 @@ class AuthService
     */
     public function logout(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
+        if (
+            session_status() === PHP_SESSION_NONE
+        ) {
             session_start();
         }
 
         $_SESSION = [];
+
         session_destroy();
     }
 }
