@@ -41,6 +41,7 @@ body {
     outline: none;
     transition: 0.3s;
     font-size: 14px;
+    box-sizing: border-box;
 }
 
 .input-group input:focus {
@@ -49,8 +50,8 @@ body {
 }
 
 .error {
-    font-size: 13px;
     color: #e74c3c;
+    font-size: 13px;
     margin-top: 5px;
 }
 
@@ -63,12 +64,10 @@ button {
     font-size: 15px;
     border-radius: 8px;
     cursor: pointer;
-    transition: 0.3s;
 }
 
 button:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(53, 122, 189, 0.3);
 }
 
 .extra-text {
@@ -79,10 +78,6 @@ button:hover {
 .extra-text a {
     color: #4a90e2;
     text-decoration: none;
-}
-
-.extra-text a:hover {
-    text-decoration: underline;
 }
 </style>
 
@@ -95,34 +90,70 @@ button:hover {
         <form method="POST" action="<?= BASE_URL ?>/Public/index.php?page=login">
 
             <div class="input-group">
+
                 <input type="email" name="email" placeholder="Email"
                     value="<?= htmlspecialchars($old['email'] ?? '') ?>">
+
                 <?php if (!empty($errors['email'])): ?>
-                <div class="error"><?= $errors['email']; ?></div>
+
+                <?php foreach ($errors['email'] as $error): ?>
+
+                <div class="error">
+                    <?= htmlspecialchars($error) ?>
+                </div>
+
+                <?php endforeach; ?>
+
                 <?php endif; ?>
+
             </div>
 
             <div class="input-group">
+
                 <input type="password" name="password" placeholder="Password">
 
                 <?php if (!empty($errors['password'])): ?>
-                <div class="error"><?= $errors['password']; ?></div>
+
+                <?php foreach ($errors['password'] as $error): ?>
+
+                <div class="error">
+                    <?= htmlspecialchars($error) ?>
+                </div>
+
+                <?php endforeach; ?>
+
                 <?php endif; ?>
 
                 <?php if (!empty($errors['general'])): ?>
-                <div class="error"><?= $errors['general']; ?></div>
+
+                <?php foreach ($errors['general'] as $error): ?>
+
+                <div class="error">
+                    <?= htmlspecialchars($error) ?>
+                </div>
+
+                <?php endforeach; ?>
+
                 <?php endif; ?>
+
             </div>
 
-            <button type="submit">Login</button>
+            <button type="submit">
+                Login
+            </button>
 
         </form>
 
         <div class="extra-text">
             Don't have an account?
-            <a href="<?= BASE_URL ?>/Public/index.php?page=register">Register</a>
+
+            <a href="<?= BASE_URL ?>/Public/index.php?page=register">
+                Register
+            </a>
         </div>
 
     </div>
 
 </div>
+
+<?php require BASE_PATH . '/view/Layout/footer.php'; ?>

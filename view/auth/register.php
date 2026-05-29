@@ -1,170 +1,191 @@
-<?php 
-// File: view/auth/register.php
-
+<?php
+require BASE_PATH . '/view/Layout/header.php';
 
 $errors = $errors ?? [];
 $old = $old ?? [];
-
-
-// 1. Include your existing top header template if your app uses one
-//include BASE_PATH . '/view/inc/header.php';
 ?>
 
 <style>
-:root {
-    --primary-color: #2196F3;
-    --primary-hover: #1e88e5;
-    --error-color: #e53935;
-    --text-color: #333333;
-    --input-border: #cccccc;
-    --bg-light: #f9f9f9;
+body {
+    background: #f4f6f9;
+    font-family: Arial, sans-serif;
 }
 
-.register-wrapper {
+.form-container {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 70vh;
-    padding: 40px 20px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .register-card {
+    width: 380px;
     background: #ffffff;
-    width: 100%;
-    max-width: 450px;
-    padding: 40px;
+    padding: 35px;
     border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-}
-
-.register-title {
-    margin: 0 0 24px 0;
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--text-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
 
-.form-group {
-    margin-bottom: 20px;
+.register-card h1 {
+    margin-bottom: 25px;
+    font-size: 26px;
+    color: #333;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #555555;
+.input-group {
+    margin-bottom: 18px;
+    text-align: left;
 }
 
-.form-control {
+.input-group input {
     width: 100%;
-    padding: 12px 16px;
-    font-size: 15px;
-    border: 1px solid var(--input-border);
-    border-radius: 6px;
-    box-sizing: border-box;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
     outline: none;
+    transition: 0.3s;
+    font-size: 14px;
+    box-sizing: border-box;
 }
 
-.form-control:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15);
+.input-group input:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
 }
 
-.form-control.is-invalid {
-    border-color: var(--error-color);
-    background-color: #fff8f8;
+.input-group input.is-invalid {
+    border-color: #e74c3c;
+    background: #fff6f6;
 }
 
-.form-control.is-invalid:focus {
-    box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.15);
-}
-
-.error-feedback {
-    color: var(--error-color);
-    margin: 6px 0 0 0;
+.error {
+    color: #e74c3c;
     font-size: 13px;
-    font-weight: 500;
+    margin-top: 5px;
 }
 
-.btn-submit {
+button {
     width: 100%;
-    padding: 14px;
-    margin-top: 10px;
-    background: var(--primary-color);
-    color: white;
+    padding: 12px;
+    background: linear-gradient(135deg, #4a90e2, #357abd);
     border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    font-weight: 600;
+    color: white;
+    font-size: 15px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
 }
 
-.btn-submit:hover {
-    background: var(--primary-hover);
+button:hover {
+    transform: translateY(-1px);
+}
+
+.extra-text {
+    margin-top: 15px;
+    font-size: 13px;
+}
+
+.extra-text a {
+    color: #4a90e2;
+    text-decoration: none;
 }
 </style>
 
-<div class="section page-wrapper register-wrapper">
+<div class="form-container">
+
     <div class="register-card">
 
-        <h2 class="register-title">Create Account</h2>
+        <h1>Create Account</h1>
 
-        <form action="<?= BASE_URL ?>/Public/index.php?page=register" method="POST">
+        <form method="POST" action="<?= BASE_URL ?>/Public/index.php?page=register">
 
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name"
-                    class="form-control <?= !empty($errors['name']) ? 'is-invalid' : '' ?>"
-                    value="<?= htmlspecialchars($old['name'] ?? '') ?>" placeholder="John Doe">
+            <!-- NAME -->
+            <div class="input-group">
+
+                <input type="text" name="name" placeholder="Full Name"
+                    value="<?= htmlspecialchars($old['name'] ?? '') ?>"
+                    class="<?= !empty($errors['name']) ? 'is-invalid' : '' ?>">
+
                 <?php if (!empty($errors['name'])): ?>
-                <p class="error-feedback"><?= $errors['name'] ?></p>
+                <?php if (is_array($errors['name'])): ?>
+                <?php foreach ($errors['name'] as $error): ?>
+                <div class="error"><?= htmlspecialchars($error) ?></div>
+                <?php endforeach; ?>
+                <?php else: ?>
+                <div class="error"><?= htmlspecialchars($errors['name']) ?></div>
                 <?php endif; ?>
+                <?php endif; ?>
+
             </div>
 
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email"
-                    class="form-control <?= !empty($errors['email'] ?? null) ? 'is-invalid' : '' ?>"
-                    value="<?= htmlspecialchars($old['email'] ?? '') ?>" placeholder="you@example.com">
-                <?php 
-                if (!empty($errors['email'])): ?>
-                <p class="error-feedback"><?= $errors['email'] ?></p>
+            <!-- EMAIL -->
+            <div class="input-group">
+
+                <input type="email" name="email" placeholder="Email"
+                    value="<?= htmlspecialchars($old['email'] ?? '') ?>"
+                    class="<?= !empty($errors['email']) ? 'is-invalid' : '' ?>">
+
+                <?php if (!empty($errors['email'])): ?>
+                <?php if (is_array($errors['email'])): ?>
+                <?php foreach ($errors['email'] as $error): ?>
+                <div class="error"><?= htmlspecialchars($error) ?></div>
+                <?php endforeach; ?>
+                <?php else: ?>
+                <div class="error"><?= htmlspecialchars($errors['email']) ?></div>
                 <?php endif; ?>
+                <?php endif; ?>
+
             </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password"
-                    class="form-control <?= !empty($errors['password']) ? 'is-invalid' : '' ?>" placeholder="••••••••">
+            <!-- PASSWORD -->
+            <div class="input-group">
+
+                <input type="password" name="password" placeholder="Password"
+                    class="<?= !empty($errors['password']) ? 'is-invalid' : '' ?>">
+
                 <?php if (!empty($errors['password'])): ?>
-                <p class="error-feedback"><?= $errors['password'] ?></p>
+                <?php if (is_array($errors['password'])): ?>
+                <?php foreach ($errors['password'] as $error): ?>
+                <div class="error"><?= htmlspecialchars($error) ?></div>
+                <?php endforeach; ?>
+                <?php else: ?>
+                <div class="error"><?= htmlspecialchars($errors['password']) ?></div>
                 <?php endif; ?>
+                <?php endif; ?>
+
             </div>
 
-            <div class="form-group">
-                <label for="confirm_password">Confirm Password</label>
-                <input type="password" id="confirm_password" name="confirm_password"
-                    class="form-control <?= !empty($errors['confirm_password']) ? 'is-invalid' : '' ?>"
-                    placeholder="••••••••">
+            <!-- CONFIRM PASSWORD -->
+            <div class="input-group">
+
+                <input type="password" name="confirm_password" placeholder="Confirm Password"
+                    class="<?= !empty($errors['confirm_password']) ? 'is-invalid' : '' ?>">
+
                 <?php if (!empty($errors['confirm_password'])): ?>
-                <p class="error-feedback"><?= $errors['confirm_password'] ?></p>
+                <?php if (is_array($errors['confirm_password'])): ?>
+                <?php foreach ($errors['confirm_password'] as $error): ?>
+                <div class="error"><?= htmlspecialchars($error) ?></div>
+                <?php endforeach; ?>
+                <?php else: ?>
+                <div class="error"><?= htmlspecialchars($errors['confirm_password']) ?></div>
                 <?php endif; ?>
+                <?php endif; ?>
+
             </div>
 
-            <button type="submit" class="btn-submit">
-                Register
-            </button>
+            <button type="submit">Register</button>
+
         </form>
 
+        <div class="extra-text">
+            Already have an account?
+            <a href="<?= BASE_URL ?>/Public/index.php?page=login">
+                Login
+            </a>
+        </div>
+
     </div>
+
 </div>
 
-<?php 
-// 2. Include your existing footer template
-//include BASE_PATH . '/view/inc/footer.php'; 
-?>
+<?php require BASE_PATH . '/view/Layout/footer.php'; ?>

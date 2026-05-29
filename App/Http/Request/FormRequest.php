@@ -35,6 +35,11 @@ abstract class FormRequest extends BaseRequest
         return $this->data;
     }
 
+    public function all(): array
+    {
+        return $this->data;
+    }
+
     // compatibility
     public function validate(): array
     {

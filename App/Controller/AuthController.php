@@ -21,24 +21,43 @@ class AuthController extends BaseController
             'old' => []
         ]);
     }
+public function register(): void
+{
+    $request = new RegisterRequest([
+        'name' => $this->post('name', ''),
+        'email' => $this->post('email', ''),
+        'password' => $this->post('password', ''),
+        'confirm_password' => $this->post('confirm_password', '')
+    ]);
 
-    public function register(): void
-    {
-        $request = new RegisterRequest([
-            'name' => $this->post('name', ''),
-            'email' => $this->post('email', ''),
-            'password' => $this->post('password', ''),
-            'confirm_password' => $this->post('confirm_password', '')
-        ]);
+    $result = $this->handleRequest(
+        $request,
+        'auth/register',
+        'Create Account',
+        function () use ($request) {
 
-        if ($request->fails()) {
-            throw new ValidationException($request->errors());
+            if (!$request->isStrongPassword()) {
+
+                throw new ValidationException([
+                    'password' =>
+                        'Password must contain uppercase, lowercase and number.'
+                ]);
+            }
+
+            return $this->service->register(
+                $request->toArray()
+            );
         }
+    );
 
-        $this->service->register($request->data());
-
-        //$this->redirect(BASE_URL . '/Public/index.php?page=login');
+    if ($result === false) {
+        return;
     }
+
+    $this->redirect(
+        BASE_URL . '/Public/index.php?page=login'
+    );
+}
 
     public function showLoginForm(): void
     {
@@ -49,25 +68,38 @@ class AuthController extends BaseController
         ]);
     }
 
-    public function login(): void
-    {
-        $request = new LoginRequest([
-            'email' => $this->post('email', ''),
-            'password' => $this->post('password', '')
-        ]);
+   public function login(): void
+{
+    $request = new LoginRequest([
+        'email' => $this->post('email', ''),
+        'password' => $this->post('password', '')
+    ]);
 
-        if ($request->fails()) {
-            throw new ValidationException($request->errors());
+    $result = $this->handleRequest(
+        $request,
+        'auth/login',
+        'Login',
+        function () use ($request) {
+
+            return $this->service->login(
+                $request->credentials()
+            );
         }
+    );
 
-        $result = $this->service->login($request->data());
-
-        session_regenerate_id(true);
-
-        $_SESSION['user'] = $result->data->toArray();
-
-        $this->redirect(BASE_URL . '/Public/index.php');
+    if ($result === false) {
+        return;
     }
+
+    session_regenerate_id(true);
+
+    $_SESSION['user'] =
+        $result->data->toArray();
+
+    $this->redirect(
+        BASE_URL . '/Public/index.php'
+    );
+}
 
     public function logout(): void
     {

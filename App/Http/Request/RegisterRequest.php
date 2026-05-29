@@ -12,15 +12,18 @@ class RegisterRequest extends FormRequest
                 'min' => 3,
                 'max' => 50
             ],
+
             'email' => [
                 'required' => true,
                 'email' => true,
                 'max' => 100
             ],
+
             'password' => [
                 'required' => true,
                 'min' => 8
             ],
+
             'confirm_password' => [
                 'required' => true,
                 'match' => 'password'
@@ -42,6 +45,7 @@ class RegisterRequest extends FormRequest
         $password = $this->data()['password'] ?? '';
 
         return preg_match('/[A-Z]/', $password)
+            && preg_match('/[a-z]/', $password)
             && preg_match('/[0-9]/', $password);
     }
 }

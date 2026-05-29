@@ -10,20 +10,23 @@ class BaseController
     |--------------------------------------------------------------------------
     */
     protected function view(
-        string $view,
-        array $data = []
-    ): void {
+    string $view,
+    array $data = []
+): void {
 
-        extract($data);
+    $data['errors'] = $data['errors'] ?? [];
+    $data['old'] = $data['old'] ?? [];
 
-        $file = BASE_PATH . '/view/' . $view . '.php';
+    extract($data);
 
-        if (!file_exists($file)) {
-            die("View not found: " . $file);
-        }
+    $file = BASE_PATH . '/view/' . $view . '.php';
 
-        require $file;
+    if (!file_exists($file)) {
+        die("View not found: " . $file);
     }
+
+    require $file;
+}
 
     /*
     |--------------------------------------------------------------------------
@@ -158,7 +161,7 @@ class BaseController
     } catch (\Throwable $e) {
 
         //  THIS IS WHAT PREVENTS WHITE PAGE
-        error_log($e);
+     error_log($e->getMessage());
 
         $this->view('errors/500', [
             'pageTitle' => 'Error',
