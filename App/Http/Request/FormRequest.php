@@ -3,46 +3,32 @@
 namespace App\Http\Request;
 
 use App\Validation\Validator;
+use App\Exceptions\ValidationException;
 
-abstract class FormRequest extends BaseRequest
+abstract class FormRequest
 {
+    protected array $data;
     protected array $errors = [];
 
     public function __construct(array $data)
     {
-        parent::__construct($data);
+        $this->data = $data;
 
         $this->errors = Validator::validate(
             $this->data,
             static::rules()
         );
+
+        // ✅ THIS IS THE KEY FIX
+        if (!empty($this->errors)) {
+            throw new ValidationException($this->errors);
+        }
     }
 
     abstract public static function rules(): array;
 
-    public function fails(): bool
-    {
-        return !empty($this->errors);
-    }
-
-    public function errors(): array
-    {
-        return $this->errors;
-    }
-
-    public function data(): array
-    {
-        return $this->data;
-    }
-
     public function all(): array
     {
         return $this->data;
-    }
-
-    // compatibility
-    public function validate(): array
-    {
-        return $this->errors;
     }
 }

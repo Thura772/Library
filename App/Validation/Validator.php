@@ -8,67 +8,62 @@ class Validator
     {
         $errors = [];
 
+        $labels = [
+            'name' => 'Full Name',
+            'email' => 'Email',
+            'password' => 'Password',
+            'confirm_password' => 'Confirm Password',
+        ];
+
         foreach ($rules as $field => $fieldRules) {
 
-            $value = isset($data[$field])
-                ? trim((string)$data[$field])
-                : null;
+            $value = trim((string)($data[$field] ?? ''));
 
             foreach ($fieldRules as $rule => $ruleValue) {
 
-                /*
-                | REQUIRED (FIXED)
-                */
                 if ($rule === 'required' && $ruleValue === true) {
-
-                    if ($value === null || $value === '') {
-                        $errors[$field][] = ucfirst($field) . ' is required.';
-                        continue 2; // stop all rules for this field
+                    if ($value === '') {
+                        $errors[$field] = ($labels[$field] ?? $field) . ' is required';
+                        break;
                     }
                 }
 
-                /*
-                | EMAIL
-                */
                 if ($rule === 'email' && $ruleValue === true) {
-
                     if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                        $errors[$field][] = 'Invalid email format.';
+                        $errors[$field] = 'Invalid email format';
+                        break;
                     }
                 }
 
-                /*
-                | MIN
-                */
                 if ($rule === 'min') {
-
                     if (strlen($value) < $ruleValue) {
-                        $errors[$field][] =
-                            ucfirst($field) . " must be at least $ruleValue characters.";
+                        $errors[$field] = "Must be at least $ruleValue characters";
+                        break;
                     }
                 }
 
-                /*
-                | MAX
-                */
                 if ($rule === 'max') {
-
                     if (strlen($value) > $ruleValue) {
-                        $errors[$field][] =
-                            ucfirst($field) . " must not exceed $ruleValue characters.";
+                        $errors[$field] = ($labels[$field] ?? $field) . " must be max $ruleValue characters";
+                        break;
                     }
                 }
 
-                /*
-                | MATCH
-                */
                 if ($rule === 'match') {
+                    if (($data[$ruleValue] ?? null) !== $value) {
+                        $errors[$field] = 'Passwords do not match';
+                        break;
+                    }
+                }
 
-                    $matchValue = $data[$ruleValue] ?? null;
-
-                    if ($value !== $matchValue) {
-                        $errors[$field][] =
-                            ucfirst($field) . ' does not match.';
+                if ($rule === 'strong_password' && $ruleValue === true) {
+                    if (
+                        !preg_match('/[A-Z]/', $value) ||
+                        !preg_match('/[a-z]/', $value) ||
+                        !preg_match('/[0-9]/', $value)
+                    ) {
+                        $errors[$field] = 'Password must contain uppercase, lowercase, and number';
+                        break;
                     }
                 }
             }

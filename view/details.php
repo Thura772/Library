@@ -7,7 +7,7 @@
         <div class="media-container">
 
             <div class="media-picture">
-                <img src="<?= BASE_URL . '/Public/' . htmlspecialchars($item['img']); ?>"
+                <img src="<?= BASE_URL . '/' . htmlspecialchars($item['img']); ?>"
                     alt="<?= htmlspecialchars($item["title"]); ?>" />
             </div>
             <div class="media-details">

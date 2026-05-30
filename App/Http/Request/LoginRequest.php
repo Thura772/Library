@@ -22,8 +22,8 @@ class LoginRequest extends FormRequest
     public function credentials(): array
     {
         return [
-            'email' => strtolower(trim($this->data()['email'] ?? '')),
-            'password' => $this->data()['password'] ?? ''
+            'email' => strtolower(trim($this->data['email'] ?? '')),
+            'password' => $this->data['password'] ?? ''
         ];
     }
 }
