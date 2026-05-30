@@ -27,7 +27,7 @@ class AuthService
 
             throw new ValidationException([
                 'email' =>
-                    'This email is already registered.'
+                'This email is already registered.'
             ]);
         }
 
@@ -64,7 +64,7 @@ class AuthService
 
             throw new ValidationException([
                 'general' =>
-                    'Invalid email or password.'
+                'Invalid email or password.'
             ]);
         }
 
@@ -75,19 +75,12 @@ class AuthService
 
     /*
     |--------------------------------------------------------------------------
-    | LOGOUT
+    | LOGOUT (BUSINESS LOGIC ONLY)
     |--------------------------------------------------------------------------
+    | No session handling here
     */
     public function logout(): void
     {
-        if (
-            session_status() === PHP_SESSION_NONE
-        ) {
-            session_start();
-        }
-
-        $_SESSION = [];
-
-        session_destroy();
+        // intentionally empty (or future token invalidation)
     }
 }

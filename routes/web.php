@@ -43,37 +43,37 @@ function handleWeb(string $page): void
     /*
     | AUTH ROUTE
     */
-   /*
+    /*
 | AUTH ROUTES
 */
-if ($page === 'register') {
+    if ($page === 'register') {
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $authController->register();
-    } else {
-        $authController->showRegisterForm();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $authController->register();
+        } else {
+            $authController->showRegisterForm();
+        }
+
+        return;
     }
 
-    return;
-}
+    if ($page === 'login') {
 
-if ($page === 'login') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $authController->login();
+        } else {
+            $authController->showLoginForm();
+        }
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $authController->login();
-    } else {
-        $authController->showLoginForm();
+        return;
     }
 
-    return;
-}
+    if ($page === 'logout') {
 
-if ($page === 'logout') {
+        $authController->logout();
 
-    $authController->logout();
-
-    return;
-}
+        return;
+    }
 
     /*
     | NORMAL ROUTES
@@ -90,7 +90,12 @@ if ($page === 'logout') {
         case 'catalog':
             (new CatalogController($catalogService))->index();
             break;
-       default:
-    throw new NotFoundException();
+
+        case 'random':
+            (new CatalogController($catalogService))->home();
+            break;
+
+        default:
+            throw new NotFoundException();
     }
 }

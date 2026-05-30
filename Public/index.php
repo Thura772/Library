@@ -11,7 +11,8 @@ error_reporting(E_ALL);
 |--------------------------------------------------------------------------
 */
 define('BASE_PATH', realpath(__DIR__ . '/..'));
-define('BASE_URL', '/MediaLibrary-MVC-');
+define('BASE_URL', '/Library');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,7 @@ use Dotenv\Dotenv;
 | SESSION (MUST START FIRST)
 |--------------------------------------------------------------------------
 */
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }

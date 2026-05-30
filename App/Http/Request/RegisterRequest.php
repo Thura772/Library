@@ -12,18 +12,16 @@ class RegisterRequest extends FormRequest
                 'min' => 3,
                 'max' => 50
             ],
-
             'email' => [
                 'required' => true,
                 'email' => true,
                 'max' => 100
             ],
-
             'password' => [
                 'required' => true,
-                'min' => 8
+                'min' => 8,
+                'strong_password' => true
             ],
-
             'confirm_password' => [
                 'required' => true,
                 'match' => 'password'
@@ -34,18 +32,9 @@ class RegisterRequest extends FormRequest
     public function toArray(): array
     {
         return [
-            'name' => trim($this->data()['name'] ?? ''),
-            'email' => strtolower(trim($this->data()['email'] ?? '')),
-            'password' => $this->data()['password'] ?? ''
+            'name' => trim($this->data['name'] ?? ''),
+            'email' => strtolower(trim($this->data['email'] ?? '')),
+            'password' => $this->data['password'] ?? ''
         ];
-    }
-
-    public function isStrongPassword(): bool
-    {
-        $password = $this->data()['password'] ?? '';
-
-        return preg_match('/[A-Z]/', $password)
-            && preg_match('/[a-z]/', $password)
-            && preg_match('/[0-9]/', $password);
     }
 }

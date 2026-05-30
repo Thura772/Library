@@ -10,15 +10,12 @@ use App\Exceptions\NotFoundException;
 
 class ErrorHandler
 {
- public static function register(): void
-{
-    set_exception_handler([self::class, 'handleException']);
+    public static function register(): void
+    {
+        set_exception_handler([self::class, 'handleException']);
 
-    // DO NOT convert ALL warnings into exceptions
-    // This is what is breaking your login
-}
-
-   
+       
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -53,15 +50,13 @@ class ErrorHandler
         | LOG ERROR
         |--------------------------------------------------------------------------
         */
-        error_log(
-            sprintf(
-                "[%s] %s in %s:%d",
-                get_class($e),
-                $e->getMessage(),
-                $e->getFile(),
-                $e->getLine()
-            )
-        );
+        error_log(sprintf(
+            "[%s] %s in %s:%d",
+            get_class($e),
+            $e->getMessage(),
+            $e->getFile(),
+            $e->getLine()
+        ));
 
         /*
         |--------------------------------------------------------------------------
@@ -70,10 +65,15 @@ class ErrorHandler
         */
         if ($e instanceof ValidationException) {
 
+            // ✅ FLASH ERRORS
             $_SESSION['errors'] = $e->getErrors();
 
+            // ✅ FLASH OLD INPUT (IMPORTANT FIX)
+            $_SESSION['old'] = $_POST;
+
+            // safer fallback redirect
             $redirect = $_SERVER['HTTP_REFERER']
-                ?? BASE_URL . '/Public/index.php?page=login';
+                ?? BASE_URL . '/Public/index.php';
 
             header('Location: ' . $redirect);
             exit;
@@ -97,6 +97,7 @@ class ErrorHandler
         | GENERIC ERROR
         |--------------------------------------------------------------------------
         */
+        http_response_code(500);
         require BASE_PATH . '/view/errors/500.php';
         exit;
     }

@@ -12,7 +12,7 @@ class ItemView
         return '
         <li>
             <a href="' . BASE_URL . '/Public/index.php?page=details&id=' . $id . '">
-                <img src="' . BASE_URL . '/Public/' . $img . '" alt="' . $title . '" />
+                <img src="' . BASE_URL . '/' . $img . '" alt="' . $title . '" />
                 <p>View Details</p>
             </a>
         </li>';
